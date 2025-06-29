@@ -1,0 +1,63 @@
+# --- General ---
+.DS_Store
+.env
+.env.*
+
+# --- Python / FastAPI ---
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.sqlite3
+*.log
+*.db
+*.egg-info/
+.venv/
+venv/
+pip-wheel-metadata/
+dist/
+build/
+
+# VS Code
+.vscode/
+
+# FastAPI specific
+backend/app/__pycache__/
+
+# Pytest cache
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.mypy_cache/
+.pyre/
+
+# --- Node / Next.js ---
+node_modules/
+.next/
+out/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+*.tsbuildinfo
+.cache/
+
+# Logs
+logs
+*.log
+
+# --- Docker (if using docker-compose) ---
+*.pid
+*.pid.lock
+docker-compose.override.yml
+
+# --- Misc ---
+.idea/               # JetBrains IDEs
+*.swp                # Vim swap files
+*.bak
+*.tmp
+
+# Mac system files
+Icon?
+Thumbs.db
