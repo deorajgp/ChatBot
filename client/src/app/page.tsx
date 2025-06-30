@@ -1,95 +1,162 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+'use client'
 
-export default function Home() {
+import {
+  Box,
+  IconButton,
+  InputAdornment,
+  TextField,
+  Typography,
+  CircularProgress,
+} from '@mui/material'
+import SendIcon from '@mui/icons-material/Send'
+import { useState } from 'react'
+
+type Message = {
+  sender: 'user' | 'bot'
+  content: string
+}
+
+export default function ChatBot() {
+  const [input, setInput] = useState('')
+  const [messages, setMessages] = useState<Message[]>([])
+  const [loading, setLoading] = useState(false)
+
+  const handleSend = async () => {
+    if (!input.trim()) return
+    const userMessage: Message = { sender: 'user', content: input }
+    setMessages((prev) => [...prev, userMessage])
+    setInput('')
+    setLoading(true)
+
+    try {
+      const res = await fetch('http://localhost:8000/api/v1/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ question: userMessage.content }),
+      })
+
+      const data = await res.json()
+      const botMessage: Message = {
+        sender: 'bot',
+        content: data.together || 'No response.',
+      }
+
+      setMessages((prev) => [...prev, botMessage])
+    } catch (err) {
+      setMessages((prev) => [
+        ...prev,
+        { sender: 'bot' as const, content: '❌ Something went wrong.' },
+      ])
+    } finally {
+      setLoading(false)
+    }
+  }
+
   return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol>
-          <li>
-            Get started by editing <code>src/app/page.tsx</code>.
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+    <Box
+      sx={{
+        height: '100vh',
+        width: '100%',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        bgcolor: '#e3eaf2',
+        p: 2,
+      }}
+    >
+      <Box
+        sx={{
+          width: '100%',
+          maxWidth: 800,
+          height: '90vh',
+          display: 'flex',
+          flexDirection: 'column',
+          background: '#ffffff',
+          borderRadius: 3,
+          boxShadow: 4,
+          p: 3,
+        }}
+      >
+        {/* Header */}
+        <Typography variant="h5" fontWeight={600} color="primary" mb={2}>
+          💬 Code Assistant
+        </Typography>
 
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.secondary}
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className={styles.footer}>
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
+        {/* Chat Messages */}
+        <Box
+          sx={{
+            flex: 1,
+            overflowY: 'auto',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 2,
+            pr: 1,
+          }}
         >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
+          {messages.map((msg, i) => (
+            <Box
+              key={i}
+              sx={{
+                alignSelf: msg.sender === 'user' ? 'flex-end' : 'flex-start',
+                bgcolor: msg.sender === 'user' ? '#1565c0' : '#f0f0f0',
+                color: msg.sender === 'user' ? 'white' : '#1a1a1a',
+                px: 2,
+                py: 1.5,
+                borderRadius: 2,
+                maxWidth: '80%',
+                whiteSpace: 'pre-wrap',
+                fontSize: '0.9rem',
+                boxShadow: 1,
+              }}
+            >
+              {msg.content}
+            </Box>
+          ))}
+
+          {loading && (
+            <Typography
+              sx={{
+                color: 'gray',
+                fontStyle: 'italic',
+                fontSize: '0.85rem',
+              }}
+            >
+              Generating response...
+            </Typography>
+          )}
+        </Box>
+
+        {/* Input Field */}
+        <Box mt={2}>
+          <TextField
+            multiline
+            rows={4}
+            placeholder="Ask your coding question..."
+            fullWidth
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault()
+                handleSend()
+              }
+            }}
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton onClick={handleSend} disabled={loading}>
+                    {loading ? <CircularProgress size={20} /> : <SendIcon sx={{ color: '#1565c0' }} />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+              style: {
+                backgroundColor: '#f9f9f9',
+                borderRadius: '8px',
+              },
+            }}
           />
-          Learn
-        </a>
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
-  );
+        </Box>
+      </Box>
+    </Box>
+  )
 }
