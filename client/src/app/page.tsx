@@ -31,11 +31,11 @@ export default function ChatBot() {
 
     try {
       const res = await axios.post('http://localhost:8000/api/v1/chat', {
-       question: userMessage.content })
+       user_question: userMessage.content })
 
       const botMessage: Message = {
         sender: 'bot',
-        content: res.data.together || 'No response.',
+        content: res.data.llm_response || 'No response.',
       }
 
       setMessages((prev) => [...prev, botMessage])

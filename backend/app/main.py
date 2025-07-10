@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.api.v1.chat import chat_router
+from app.api.v1.chat_api import chat_router
 
 app = FastAPI(title="Code Helper Chatbot")
 
@@ -11,5 +11,4 @@ app.add_middleware(
     allow_methods=["*"],  
     allow_headers=["*"], 
 )
-
 app.include_router(chat_router, prefix="/api/v1", tags=["Chat"])

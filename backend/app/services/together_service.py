@@ -1,9 +1,16 @@
 import together
-from app.core.config import get_together_api_key
+import os
+from dotenv import load_dotenv
 
-together.api_key = get_together_api_key()
+load_dotenv()
+together.api_key = os.getenv("TOGETHER_API_KEY")
 
-def get_together_response(question: str):
+def get_together_response(user_question: str):
+    """
+    This function sends a coding problem to Together API
+    and returns the response in a clean format.
+    """
+
     prompt = f"""
 You are a coding assistant.
 
@@ -25,7 +32,7 @@ Algorithm: Generate every possible combination and check the sum.
 
 Now follow the same format for this coding problem:
 
-{question}
+{user_question}
 """
 
     try:
@@ -33,14 +40,12 @@ Now follow the same format for this coding problem:
             prompt=prompt,
             model="mistralai/Mixtral-8x7B-Instruct-v0.1",
             max_tokens=500,
-            temperature=0.3,
-            stop=["---"]
+            temperature=0.3
         )
-        full_text = response['choices'][0]['text']
-        # Trim everything before the first "Approach:"
-        if "Approach:" in full_text:
-            trimmed = full_text.split("Approach:", 1)[1]
-            return "Approach:" + trimmed.strip()
-        return full_text.strip()
-    except Exception as e:
-        return f"Error from Together API: {e}"
+
+        result = response['choices'][0]['text']
+        result = "Approach:" + result.split("Approach:", 1)[1].strip()
+        return result
+
+    except Exception as error:
+        return f"Error: {error}"

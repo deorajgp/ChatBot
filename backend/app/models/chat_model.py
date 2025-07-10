@@ -1,8 +1,8 @@
 from pydantic import BaseModel
 
 class ChatRequest(BaseModel):
-    question: str
+    user_question: str
 
 class ChatResponse(BaseModel):
-    # ollama: str
-    together: str
+    llm_response: str
+    
