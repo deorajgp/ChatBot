@@ -7,10 +7,12 @@ import {
   Typography,
   CircularProgress,
   MenuItem,
+  Tooltip,
 } from '@mui/material'
 import SendIcon from '@mui/icons-material/Send'
 import { useState } from 'react'
 import axios from 'axios'
+import { Message } from '@mui/icons-material'
 
 type Message = {
   sender: 'user' | 'bot'
@@ -24,11 +26,22 @@ export default function ChatBot() {
   const [selectedModel, setModel] = useState('mistralai/Mixtral-8x7B-Instruct-v0.1')
 
   const models = [
-  { label: 'Mixtral 8x7B', value: 'mistralai/Mixtral-8x7B-Instruct-v0.1' },
-  { label: 'CodeLlama 13B', value: 'togethercomputer/CodeLlama-13B-Instruct' },
-  { label: 'DeepSeek Coder 6.7B', value: 'deepseek-ai/deepseek-coder-6.7b-instruct' },
+  {
+    label: 'Mixtral 8x7B Instruct',
+    value: 'mistralai/Mixtral-8x7B-Instruct-v0.1',
+  },
+  
+  {
+    label: 'DeepSeek',
+    value: 'deepseek-ai/DeepSeek-V3',
+  },
+  {
+    label: 'Meta Llama',
+    value: 'meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo',
+  },
 
 ]
+
 
   const handleSend = async () => {
     if (!input.trim()) return
@@ -59,6 +72,34 @@ export default function ChatBot() {
     }
   }
 
+  const handlePseudocode = async () => {
+    if(!input.trim()) return
+    const userMessage: Message={sender: 'user', content: input}
+    setMessages((prev) => [...prev, userMessage])
+    setInput('')
+    setLoading(true)
+
+    try {
+    const res= await axios.post('http://localhost:8000/api/v1/pseudocode', {
+      user_question: userMessage.content,
+      llm_model: selectedModel
+    })
+    const botMessage: Message = {
+      sender: 'bot',
+      content: res.data.llm_response || 'No response.'
+    }
+    setMessages((prev) => [...prev, botMessage])
+    } catch (err) {
+      setMessages((prev) => [
+        ...prev,
+        { sender: 'bot' as const, content: '❌ Something went wrong.' },
+      ])
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  
   return (
   <Box
     sx={{
@@ -146,15 +187,9 @@ export default function ChatBot() {
         handleSend()
       }
     }}
-    InputProps={{
-      style: {
-        backgroundColor: '#f9f9f9',
-        borderRadius: '8px',
-      },
-    }}
   />
 
-  {/* Send Button */}
+  {/* Send and Pseudocode Button */}
   <IconButton
     onClick={handleSend}
     disabled={loading}
@@ -162,6 +197,11 @@ export default function ChatBot() {
   >
     {loading ? <CircularProgress size={20} /> : <SendIcon />}
   </IconButton>
+  <Tooltip title="Generate Pseudocode" arrow>
+  <IconButton onClick={handlePseudocode} disabled={loading}>
+    📝
+  </IconButton>
+  </Tooltip>
 
   {/* Model Selector*/}
   <TextField

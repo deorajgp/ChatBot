@@ -6,16 +6,12 @@ load_dotenv()
 together.api_key = os.getenv("TOGETHER_API_KEY")
 
 def get_together_response(user_question: str, llm_model: str):
-    """
-    This function sends a coding problem to Together API
-    and returns the response in a clean format.
-    """
 
     prompt = f"""
 You are a coding assistant.
 
 Given a coding problem, your task is to provide two concise solutions — **Optimal and Brute Force** — formatted exactly like the example below. Avoid unnecessary reasoning or thinking aloud.
-
+solve the problem only if it is a coding problem. otherwise return "Not a coding problem".
 Output Example:
 
 Approach: Hashing, Two-pointer  
@@ -30,15 +26,16 @@ Time: O(n^2)
 Space: O(1)  
 Algorithm: Generate every possible combination and check the sum.
 
-Now follow the same format for this coding problem:
+Now follow the same format for this coding problem only if it is a coding problem:
 
 {user_question}
+
 """
 
     try:
         response = together.Complete.create(
             prompt=prompt,
-            model="mistralai/Mixtral-8x7B-Instruct-v0.1",
+            model=llm_model,
             max_tokens=500,
             temperature=0.3
         )
@@ -49,3 +46,24 @@ Now follow the same format for this coding problem:
 
     except Exception as error:
         return f"Error: {error}"
+    
+def get_pseudocode_response(question: str, model: str):
+    prompt = f"""
+You are a programming expert.
+
+Given the following coding problem, provide **only the Pseudocode** in a clear step-by-step format without any additional explanation.
+If the question is not a coding problem, return "Not a coding problem".
+
+Problem:
+{question}
+"""
+    try:
+        response = together.Complete.create(
+            prompt=prompt,
+            model=model,
+            max_tokens=500,
+            temperature=0.2
+        )
+        return response['choices'][0]['text'].strip()
+    except Exception as e:
+        return f"Error: {e}"
