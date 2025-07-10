@@ -10,6 +10,7 @@ import {
 } from '@mui/material'
 import SendIcon from '@mui/icons-material/Send'
 import { useState } from 'react'
+import axios from 'axios'
 
 type Message = {
   sender: 'user' | 'bot'
@@ -29,16 +30,12 @@ export default function ChatBot() {
     setLoading(true)
 
     try {
-      const res = await fetch('http://localhost:8000/api/v1/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ question: userMessage.content }),
-      })
+      const res = await axios.post('http://localhost:8000/api/v1/chat', {
+       question: userMessage.content })
 
-      const data = await res.json()
       const botMessage: Message = {
         sender: 'bot',
-        content: data.together || 'No response.',
+        content: res.data.together || 'No response.',
       }
 
       setMessages((prev) => [...prev, botMessage])
@@ -54,7 +51,7 @@ export default function ChatBot() {
 
   return (
     <Box
-      sx={{
+       sx={{
         height: '100vh',
         width: '100%',
         display: 'flex',
