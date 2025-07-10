@@ -37,7 +37,7 @@ export default function ChatBot() {
   },
   {
     label: 'Meta Llama',
-    value: 'meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo',
+    value: 'meta-llama/Llama-Vision-Free',
   },
 
 ]
