@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 load_dotenv()
 together.api_key = os.getenv("TOGETHER_API_KEY")
 
-def get_together_response(user_question: str):
+def get_together_response(user_question: str, llm_model: str):
     """
     This function sends a coding problem to Together API
     and returns the response in a clean format.
